@@ -225,6 +225,20 @@
     }
 
     /* ==========================================
+       FORM CONFIRMATION MESSAGE
+       ========================================== */
+    .form-message {
+      display: none;                      /* hidden until the form is sent */
+      margin-top: 15px;
+      padding: 12px;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    /* ==========================================
        FOOTER
        ========================================== */
     footer {
@@ -381,12 +395,13 @@
       <p><strong>Facebook:</strong> <a href="https://web.facebook.com/?_rdc=1&_rdr#">facebook.com/yourname</a></p>
       <p><strong>GitHub:</strong> <a href="https://github.com">github.com/yourname</a></p>
 
-      <!-- Optional contact form -->
-      <form>
-        <input type="text" placeholder="Your name">
-        <input type="email" placeholder="Your email">
-        <textarea placeholder="Your message" rows="4"></textarea>
-        <button type="button" class="button">Send</button>
+      <!-- Contact form -->
+      <form id="contact-form">
+        <input type="text" id="name" placeholder="Your name" required>
+        <input type="email" id="email" placeholder="Your email" required>
+        <textarea id="message" placeholder="Your message" rows="4" required></textarea>
+        <button type="submit" class="button">Send</button>
+        <p id="form-message" class="form-message"></p>
       </form>
     </div>
   </section>
@@ -394,6 +409,27 @@
   <footer>
     <p>&copy; 2026 De Guzman Prince Christian P.</p>
   </footer>
+
+  <script>
+    const form = document.getElementById("contact-form");
+    const message = document.getElementById("form-message");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();   // stops the page from reloading
+
+      const name = document.getElementById("name").value;
+
+      message.textContent = "Thank you, " + name + "! Your message has been sent.";
+      message.style.display = "block";
+
+      form.reset();             // clears the fields
+
+      // hide the message again after 5 seconds
+      setTimeout(function () {
+        message.style.display = "none";
+      }, 5000);
+    });
+  </script>
 
 </body>
 </html>
