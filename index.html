@@ -5,27 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>De Guzman Prince Christian P. | Portfolio</title>
 
+  <!-- Montserrat font for the headings and menu (falls back to Arial if offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+
   <style>
     /* ==========================================
        COLORS (changing these changes the whole site)
        Light mode is the default.
        ========================================== */
     :root {
-      --bg: #f4f7fb;          /* page background */
-      --box-bg: #ffffff;      /* cards and boxes */
-      --text: #1f2933;        /* main text */
-      --accent: #2563eb;      /* blue accent color */
-      --border: #d5dde8;      /* border color */
+      --bg: #efe8dd;                          /* page color (shows if the image is missing) */
+      --overlay: rgba(245, 240, 232, 0.86);   /* light layer over the background image */
+      --box-bg: rgba(255, 252, 247, 0.80);    /* frosted boxes and cards */
+      --solid: #fffdf9;                       /* solid color for inputs and popup */
+      --text: #2b2622;                        /* main text */
+      --accent: #9a5b1f;                      /* warm coffee-brown accent (was blue) */
+      --on-accent: #ffffff;                   /* text color on top of the accent */
+      --border: #d9ccbd;                      /* border color */
+      --nav-bg: rgba(74, 52, 38, 0.90);       /* menu and footer: coffee brown */
+      --nav-text: #f5efe6;                    /* menu and footer text */
+      --nav-bar: rgba(74, 52, 38, 0.92);      /* top menu bar */
+      --nav-line: #f0c48a;                    /* underline under a menu link on hover */
     }
 
     /* BONUS: Dark mode - used automatically if the device is set to dark mode */
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #111827;
-        --box-bg: #1f2937;
-        --text: #e5e7eb;
-        --accent: #60a5fa;
-        --border: #374151;
+        --bg: #1b1d22;
+        --overlay: rgba(20, 22, 27, 0.68);    /* dark layer over the background image */
+        --box-bg: rgba(40, 42, 50, 0.60);     /* frosted boxes and cards */
+        --solid: #24262c;
+        --text: #ece7df;
+        --accent: #e0a96d;                    /* warm latte-amber accent (was blue) */
+        --on-accent: #1c1917;
+        --border: #4d4842;
+        --nav-bg: rgba(46, 37, 31, 0.86);     /* menu and footer: dark coffee brown */
+        --nav-text: #f5efe6;
+        --nav-bar: rgba(28, 26, 25, 0.55);    /* top menu bar (see-through) */
+        --nav-line: #e0a96d;
       }
     }
 
@@ -37,6 +56,9 @@
     }
 
     body {
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;                       /* the page never scrolls sideways, only the slides move */
       margin: 0;                              /* margin */
       font-family: Arial, sans-serif;         /* fonts */
       font-size: 18px;                        /* font size */
@@ -45,8 +67,27 @@
       color: var(--text);                     /* colors */
     }
 
+    /* BACKGROUND IMAGE
+       A fixed layer behind everything. The gradient on top of the image
+       tints it so the text and boxes blend in and stay easy to read. */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-image:
+        linear-gradient(var(--overlay), var(--overlay)),
+        url("images/background.svg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
     h1, h2, h3 {
-      font-family: Georgia, serif;
+      font-family: "Montserrat", Arial, sans-serif;
     }
 
     h2 {
@@ -59,10 +100,58 @@
       color: var(--accent);
     }
 
-    section {
-      padding: 60px 20px;                     /* padding */
-      max-width: 1000px;                      /* width */
-      margin: 0 auto;
+    /* ==========================================
+       SLIDER (presentation style)
+       .slider = the window you look through
+       .track  = a long row holding all the slides side by side
+       .slide  = one topic (one screen wide)
+       JavaScript moves the track left and right.
+       ========================================== */
+    .slider {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .track {
+      --count: 7;                             /* number of slides */
+      display: flex;                          /* flexbox: slides sit side by side */
+      width: calc(var(--count) * 100%);
+      height: 100%;
+      will-change: transform;                 /* tells the browser to prepare for smooth movement */
+      transition: transform var(--speed, 0.9s) cubic-bezier(0.65, 0, 0.35, 1);   /* the smooth slide */
+    }
+
+    .slide {
+      flex: 0 0 calc(100% / var(--count));    /* each slide is exactly one screen wide */
+      height: 100%;
+      overflow-y: auto;                       /* scroll up/down inside a slide if it is long */
+      padding: 130px 20px 80px;               /* keeps content clear of the menu and footer */
+      opacity: 0.2;                           /* slides that are not on screen are faded */
+      transition: opacity var(--speed, 0.9s) ease;   /* fades in and out while sliding */
+    }
+
+    .slide.current {
+      opacity: 1;                             /* the slide you are viewing is fully visible */
+    }
+
+    /* Center the content of each slide */
+    .slide > * {
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Skip the sliding animation for people who turn off animations */
+    @media (prefers-reduced-motion: reduce) {
+      .track,
+      .slide {
+        transition: none;
+      }
     }
 
     /* ==========================================
@@ -70,34 +159,76 @@
        ========================================== */
     nav {
       display: flex;                          /* flexbox */
-      justify-content: center;
+      justify-content: space-between;         /* logo on the left, links on the right */
+      align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
-      padding: 15px;
-      background-color: var(--accent);
-      position: sticky;                       /* menu stays at the top while scrolling */
+      gap: 10px 30px;
+      padding: 18px 6%;
+      background-color: var(--nav-bar);
+      backdrop-filter: blur(8px);             /* frosted glass look */
+      position: fixed;                        /* menu stays at the top while scrolling */
       top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 50;
+    }
+
+    /* Logo on the left */
+    .logo {
+      font-family: "Montserrat", Arial, sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* Links on the right */
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 26px;
     }
 
     nav a {
-      color: white;
+      color: var(--nav-text);
       text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 20px;                    /* border-radius */
+      font-family: "Montserrat", Arial, sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 6px 0;
+      border-bottom: 2px solid transparent;
     }
 
-    /* Hover effect */
+    /* Hover effect: a line appears under the link */
     nav a:hover {
-      background-color: white;
-      color: var(--accent);
+      border-bottom-color: var(--nav-line);
+    }
+
+    /* The link of the page you are currently on stays underlined */
+    nav a.active {
+      border-bottom-color: var(--nav-line);
+    }
+
+    .logo:hover {
+      border-bottom-color: transparent;
     }
 
     /* ==========================================
        HOME SECTION
        ========================================== */
     .home {
+      display: flex;                          /* flexbox */
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      animation: fadeIn 1.5s;                 /* BONUS: CSS animation */
+    }
+
+    /* These two lines center the home content up and down */
+    .home > :first-child {
+      margin-top: auto;
+    }
+
+    .home > :last-child {
+      margin-bottom: auto;
     }
 
     .profile-pic {
@@ -107,23 +238,28 @@
       border-radius: 50%;                     /* makes the picture round */
       border: 5px solid var(--accent);        /* border */
       background-color: var(--border);
+      animation: fadeIn 1.5s;                 /* BONUS: CSS animation */
     }
 
     .home h1 {
-      font-size: 44px;
-      margin: 20px 0 5px;
+      font-size: clamp(28px, 5vw, 52px);      /* big, but shrinks on small screens */
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.15;
+      margin: 24px 0 12px;
     }
 
     .tagline {
       font-style: italic;
       color: var(--accent);
-      font-size: 22px;
+      font-size: 20px;
       margin: 0 0 15px;
     }
 
     .intro {
-      max-width: 500px;
-      margin: 0 auto 25px;
+      max-width: 700px;
+      margin: 0 auto;
     }
 
     /* The animation itself */
@@ -138,7 +274,7 @@
     .button {
       display: inline-block;
       background-color: var(--accent);
-      color: white;
+      color: var(--on-accent);
       padding: 12px 28px;
       border: none;
       border-radius: 8px;
@@ -159,6 +295,7 @@
       padding: 25px;
       border: 2px solid var(--border);
       border-radius: 12px;
+      backdrop-filter: blur(6px);             /* frosted glass look */
     }
 
     /* ==========================================
@@ -179,6 +316,7 @@
       width: 200px;
       text-align: center;
       font-weight: bold;
+      backdrop-filter: blur(6px);
     }
 
     /* Hover effect */
@@ -203,6 +341,7 @@
     }
 
     .project h3 {
+      font-size: 18px;
       margin: 15px 0 5px;
     }
 
@@ -222,19 +361,82 @@
       border-radius: 8px;
       font-size: 16px;
       font-family: Arial, sans-serif;
+      background-color: var(--solid);
+      color: var(--text);
     }
 
     /* ==========================================
-       FORM CONFIRMATION MESSAGE
+       LOADING POPUP
        ========================================== */
-    .form-message {
-      display: none;                      /* hidden until the form is sent */
-      margin-top: 15px;
-      padding: 12px;
-      border: 2px solid var(--accent);
-      border-radius: 8px;
+    .popup {
+      display: none;                          /* hidden until Send is pressed */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    /* The popup shows when JavaScript adds the class "show" */
+    .popup.show {
+      display: flex;
+    }
+
+    .popup-box {
+      display: grid;                          /* puts both steps in the same spot */
+      width: 300px;
+      padding: 30px;
+      background-color: var(--solid);
+      border-radius: 12px;
       text-align: center;
-      font-weight: bold;
+    }
+
+    .sending,
+    .done {
+      grid-area: 1 / 1;
+    }
+
+    /* Spinning circle */
+    .loader {
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 15px;
+      border: 6px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* After 2 seconds the loading step fades out... */
+    .sending {
+      animation: hideStep 0.3s 2s forwards;
+    }
+
+    /* ...and the done step fades in */
+    .done {
+      opacity: 0;
+      visibility: hidden;
+      animation: showStep 0.3s 2s forwards;
+    }
+
+    @keyframes hideStep {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    @keyframes showStep {
+      to { opacity: 1; visibility: visible; }
+    }
+
+    .done h3 {
+      margin: 0 0 5px;
       color: var(--accent);
     }
 
@@ -242,10 +444,16 @@
        FOOTER
        ========================================== */
     footer {
+      position: fixed;                        /* always visible at the bottom */
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 40;
       text-align: center;
-      padding: 20px;
-      background-color: var(--accent);
-      color: white;
+      padding: 14px;
+      background-color: var(--nav-bg);
+      border-top: 1px solid var(--border);
+      color: var(--nav-text);
     }
 
     footer p {
@@ -261,8 +469,18 @@
         font-size: 16px;
       }
 
-      .home h1 {
-        font-size: 32px;
+      nav {
+        justify-content: center;              /* logo and links centered on phones */
+        text-align: center;
+      }
+
+      .nav-links {
+        justify-content: center;
+        gap: 6px 16px;
+      }
+
+      .slide {
+        padding-top: 175px;                   /* the menu is taller on phones */
       }
 
       .card,
@@ -270,6 +488,8 @@
         width: 100%;
       }
     }
+  
+
   </style>
 </head>
 
@@ -278,18 +498,25 @@
   <!-- ========== NAVIGATION MENU ========== -->
   <header>
     <nav>
-      <a href="#home">Home</a>
-      <a href="#about">About Me</a>
-      <a href="#skills">Skills</a>
-      <a href="#projects">Projects</a>
-      <a href="#achievements">Achievements</a>
-      <a href="#goals">Goals</a>
-      <a href="#contact">Contact</a>
+      <a href="#home" class="logo">PRINCE</a>
+
+      <div class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#about">About Me</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#achievements">Achievements</a>
+        <a href="#goals">Goals</a>
+        <a href="#contact">Contact</a>
+      </div>
     </nav>
   </header>
 
-  <!-- ========== 1. HOME ========== -->
-  <section id="home" class="home">
+  <!-- ========== SLIDES (each topic is one slide) ========== -->
+  <main class="slider">
+    <div class="track" id="track">
+
+  <section id="home" class="slide home">
     <!-- Put your photo inside the "images" folder and name it profile.jpg -->
     <img src="images/profile.jpg" alt="My profile picture" class="profile-pic">
     <h1>De Guzman Prince Christian P.</h1>
@@ -298,11 +525,9 @@
       Hello! I am a student who loves learning how websites are made.
       Welcome to my portfolio.
     </p>
-    <a href="#contact" class="button">Contact Me</a>
   </section>
 
-  <!-- ========== 2. ABOUT ME ========== -->
-  <section id="about">
+  <section id="about" class="slide">
     <h2>About Me</h2>
     <div class="box">
       <p>
@@ -319,8 +544,7 @@
     </div>
   </section>
 
-  <!-- ========== 3. MY SKILLS ========== -->
-  <section id="skills">
+  <section id="skills" class="slide">
     <h2>My Skills</h2>
     <div class="card-container">
       <div class="card">Drawing</div>
@@ -331,8 +555,7 @@
     </div>
   </section>
 
-  <!-- ========== 4. MY PROJECTS ========== -->
-  <section id="projects">
+  <section id="projects" class="slide">
     <h2>My Projects</h2>
     <div class="card-container">
 
@@ -349,7 +572,7 @@
         <img src="images/project2.svg" alt="RTT Cafe POS logo">
         <h3>Project 2: RTT Café POS &amp; Inventory System</h3>
         <p>A Point of Sale and inventory system for a café, made together with my friends.</p>
-        <p><strong>Technologies:</strong> Visual Basics</p>
+        <p><strong>Technologies:</strong> (add here)</p>
       </div>
 
       <!-- Project 3 (to be filled in later) -->
@@ -363,8 +586,7 @@
     </div>
   </section>
 
-  <!-- ========== 5. ACHIEVEMENTS ========== -->
-  <section id="achievements">
+  <section id="achievements" class="slide">
     <h2>Achievements</h2>
     <div class="box">
       <ul>
@@ -375,59 +597,147 @@
     </div>
   </section>
 
-  <!-- ========== 6. GOALS ========== -->
-  <section id="goals">
+  <section id="goals" class="slide">
     <h2>Future Goals</h2>
     <div class="box">
       <ul>
         <li>Finish my degree</li>
         <li>Learn JavaScript and build interactive websites</li>
-        <li>Become a professional web developer</li>
+        <li>Become a professional web/game developer</li>
       </ul>
     </div>
   </section>
 
-  <!-- ========== 7. CONTACT ME ========== -->
-  <section id="contact">
+  <section id="contact" class="slide">
     <h2>Contact Me</h2>
     <div class="box">
       <p><strong>Email:</strong> actdocumentation2004@gmail.com</p>
-      <p><strong>Facebook:</strong> <a href="https://web.facebook.com/?_rdc=1&_rdr#">facebook.com/yourname</a></p>
-      <p><strong>GitHub:</strong> <a href="https://github.com">github.com/yourname</a></p>
+      <p><strong>Facebook:</strong> <a href="https://facebook.com/yourname">facebook.com/yourname</a></p>
+      <p><strong>GitHub:</strong> <a href="https://github.com/yourname">github.com/yourname</a></p>
 
-      <!-- Contact form -->
+      <!-- Optional contact form -->
       <form id="contact-form">
-        <input type="text" id="name" placeholder="Your name" required>
-        <input type="email" id="email" placeholder="Your email" required>
-        <textarea id="message" placeholder="Your message" rows="4" required></textarea>
+        <input type="text" placeholder="Your name" required>
+        <input type="email" placeholder="Your email" required>
+        <textarea placeholder="Your message" rows="4" required></textarea>
         <button type="submit" class="button">Send</button>
-        <p id="form-message" class="form-message"></p>
       </form>
     </div>
   </section>
+
+    </div>
+  </main>
+
+  <!-- ========== LOADING POPUP (shows when Send is pressed) ========== -->
+  <div class="popup" id="popup">
+    <div class="popup-box">
+
+      <!-- Step 1: loading spinner (shows for 2 seconds) -->
+      <div class="sending">
+        <div class="loader"></div>
+        <p>Sending your message...</p>
+      </div>
+
+      <!-- Step 2: done message (appears after 2 seconds) -->
+      <div class="done">
+        <h3>Thank you!</h3>
+        <p>Your message was sent.</p>
+        <button type="button" class="button" id="close-popup">Close</button>
+      </div>
+
+    </div>
+  </div>
 
   <footer>
     <p>&copy; 2026 De Guzman Prince Christian P.</p>
   </footer>
 
+  <!-- ========== SCRIPT: slides, contact popup ========== -->
   <script>
-    const form = document.getElementById("contact-form");
-    const message = document.getElementById("form-message");
+    var track = document.getElementById("track");
+    var slides = document.querySelectorAll(".slide");
+    var menuLinks = document.querySelectorAll(".nav-links a");
+    var current = 0;
 
+    // Slide to a topic by its number (0 = Home, 1 = About Me, ...)
+    function goTo(index, instant) {
+      if (index < 0 || index >= slides.length) return;
+
+      // Longer trips take a little more time so they don't look like a blink
+      var distance = Math.abs(index - current);
+      var seconds = instant ? 0 : Math.min(0.9 + (distance - 1) * 0.15, 1.6);
+      track.style.setProperty("--speed", seconds + "s");
+
+      current = index;
+
+      // Move the track left. Each slide is 1/7 of the track.
+      track.style.transform = "translateX(-" + (index * 100 / slides.length) + "%)";
+
+      // Underline the current menu link and block tabbing into hidden slides
+      for (var i = 0; i < slides.length; i++) {
+        menuLinks[i].classList.toggle("active", i === index);
+        slides[i].classList.toggle("current", i === index);   // fully visible only when current
+        slides[i].inert = (i !== index);
+      }
+
+      history.replaceState(null, "", "#" + slides[index].id);   // updates the link in the address bar
+    }
+
+    // Clicking a menu link slides to that topic instead of jumping
+    document.querySelectorAll("nav a").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        var id = link.getAttribute("href").slice(1);
+        for (var i = 0; i < slides.length; i++) {
+          if (slides[i].id === id) goTo(i);
+        }
+      });
+    });
+
+    // Left and right arrow keys also change slides
+    document.addEventListener("keydown", function (event) {
+      var tag = event.target.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;   // don't change slides while typing
+      if (event.key === "ArrowRight") goTo(current + 1);
+      if (event.key === "ArrowLeft") goTo(current - 1);
+    });
+
+    // Swipe left or right on a phone
+    var startX = 0, startY = 0;
+    document.addEventListener("touchstart", function (event) {
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+    });
+    document.addEventListener("touchend", function (event) {
+      var dx = event.changedTouches[0].clientX - startX;
+      var dy = event.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        goTo(dx < 0 ? current + 1 : current - 1);
+      }
+    });
+
+    // Open the right slide if the link has one, for example ...index.html#projects
+    var start = 0;
+    for (var i = 0; i < slides.length; i++) {
+      if ("#" + slides[i].id === location.hash) start = i;
+    }
+    goTo(start, true);                 // true = no sliding animation on the first load
+
+    // ----- Contact form popup -----
+    var form = document.getElementById("contact-form");
+    var popup = document.getElementById("popup");
+
+    // This runs only if all boxes are filled in and the email is correct.
+    // If not, the browser shows its own error message and stops.
     form.addEventListener("submit", function (event) {
-      event.preventDefault();   // stops the page from reloading
+      event.preventDefault();          // stops the page from reloading
+      popup.classList.add("show");     // shows the popup
+    });
 
-      const name = document.getElementById("name").value;
-
-      message.textContent = "Thank you, " + name + "! Your message has been sent.";
-      message.style.display = "block";
-
-      form.reset();             // clears the fields
-
-      // hide the message again after 5 seconds
-      setTimeout(function () {
-        message.style.display = "none";
-      }, 5000);
+    // Close button hides the popup and clears the form
+    document.getElementById("close-popup").addEventListener("click", function () {
+      popup.classList.remove("show");
+      form.reset();
     });
   </script>
 
