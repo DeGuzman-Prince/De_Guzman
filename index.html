@@ -441,6 +441,86 @@
     }
 
     /* ==========================================
+       IMAGE VIEWER (click a project picture to enlarge it)
+       ========================================== */
+    .project img {
+      cursor: zoom-in;                        /* the mouse turns into a magnifier */
+    }
+
+    .project img:hover {
+      opacity: 0.85;                          /* hover effect */
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 15px;
+      margin: -10px auto 20px;
+      opacity: 0.8;
+    }
+
+    .lightbox {
+      display: none;                          /* hidden until a picture is clicked */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.88);  /* dark backdrop */
+      cursor: zoom-out;
+      z-index: 110;                           /* above the menu, footer and popup */
+      animation: fadeIn 0.3s;
+    }
+
+    /* JavaScript adds the class "show" when a picture is clicked */
+    .lightbox.show {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 92vw;                        /* big, but never bigger than the screen */
+      max-height: 78vh;
+      border-radius: 8px;
+      animation: zoomIn 0.35s;                /* the picture grows into view */
+    }
+
+    .lightbox p {
+      margin: 14px 0 0;
+      color: #ffffff;
+      font-family: "Montserrat", Arial, sans-serif;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .lightbox .lightbox-hint {
+      margin-top: 6px;
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 40px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ==========================================
        FOOTER
        ========================================== */
     footer {
@@ -557,6 +637,7 @@
 
   <section id="projects" class="slide">
     <h2>My Projects</h2>
+    <p class="hint">Click a picture to enlarge it.</p>
     <div class="card-container">
 
       <!-- Project 1 -->
@@ -648,6 +729,14 @@
     </div>
   </div>
 
+  <!-- ========== IMAGE VIEWER (opens when a project picture is clicked) ========== -->
+  <div class="lightbox" id="lightbox">
+    <button type="button" class="lightbox-close" aria-label="Close picture">&times;</button>
+    <img id="lightbox-img" alt="">
+    <p id="lightbox-caption"></p>
+    <p class="lightbox-hint">Click anywhere or press Esc to close</p>
+  </div>
+
   <footer>
     <p>&copy; 2026 De Guzman Prince Christian P.</p>
   </footer>
@@ -696,6 +785,8 @@
 
     // Left and right arrow keys also change slides
     document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeLightbox();         // Esc closes the enlarged picture
+      if (lightbox.classList.contains("show") || popup.classList.contains("show")) return;   // don't slide behind a popup
       var tag = event.target.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA") return;   // don't change slides while typing
       if (event.key === "ArrowRight") goTo(current + 1);
@@ -709,6 +800,7 @@
       startY = event.touches[0].clientY;
     });
     document.addEventListener("touchend", function (event) {
+      if (lightbox.classList.contains("show") || popup.classList.contains("show")) return;   // no swiping behind a popup
       var dx = event.changedTouches[0].clientX - startX;
       var dy = event.changedTouches[0].clientY - startY;
       if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
@@ -722,6 +814,27 @@
       if ("#" + slides[i].id === location.hash) start = i;
     }
     goTo(start, true);                 // true = no sliding animation on the first load
+
+    // ----- Image viewer: click a project picture to enlarge it -----
+    var lightbox = document.getElementById("lightbox");
+    var lightboxImg = document.getElementById("lightbox-img");
+    var lightboxCaption = document.getElementById("lightbox-caption");
+
+    document.querySelectorAll(".project img").forEach(function (img) {
+      img.addEventListener("click", function () {
+        lightboxImg.src = img.src;                 // same picture, shown big
+        lightboxImg.alt = img.alt;
+        lightboxCaption.textContent = img.parentElement.querySelector("h3").textContent;   // project title
+        lightbox.classList.add("show");            // CSS .lightbox.show displays it
+      });
+    });
+
+    function closeLightbox() {
+      lightbox.classList.remove("show");
+    }
+
+    // Clicking anywhere on the dark area (or the X) closes it
+    lightbox.addEventListener("click", closeLightbox);
 
     // ----- Contact form popup -----
     var form = document.getElementById("contact-form");
